@@ -1,0 +1,50 @@
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stripe Checkout</title>
+</head>
+<body>
+    <h1>Checkout Page</h1>
+    <button id="checkout-button">Checkout</button>
+
+    <!-- Load Stripe.js -->
+    <script src="https://js.stripe.com/v3/"></script>
+
+    <script>
+        // Initialize Stripe with your publishable key
+        const stripe = Stripe('pk_test_51QP05PJTvqNvN4zRrFLslWBx1Th0S79U4xY0YmwYvntjzlxKlzqbjacTldp7f2pAGOXGHELwjvIH0yKuTVQnYwox00vnMixCEi');  // Your Stripe publishable key
+
+        // Function to create the checkout session
+        async function createCheckoutSession() {
+            // Send a POST request to create a checkout session
+            const response = await fetch('/create-checkout-session', {
+                method: 'POST',  // POST request to create session
+                headers: {
+                    'Content-Type': 'application/json',  // Send request as JSON
+                },
+            });
+
+            // Parse the response
+            const session = await response.json(); 
+
+            if (session.id) {
+                // If session ID is received, redirect the user to Stripe Checkout
+                const { error } = await stripe.redirectToCheckout({ sessionId: session.id });
+                if (error) {
+                    alert(error.message);  // Display error if redirection fails
+                }
+            } else {
+                alert('Session ID not received');  // Handle error if session ID is not received
+            }
+        }
+
+        // Add event listener to the Checkout button
+        document.getElementById('checkout-button').addEventListener('click', () => {
+            createCheckoutSession();
+        });
+    </script>
+</body>
+</html>
+
