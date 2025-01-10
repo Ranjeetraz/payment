@@ -10,7 +10,7 @@ sudo pkill -f runserver
 cd /home/ubuntu/django-aws_cicd/
 
 # activate virtual environment
-python3 -m venv venv
+python3.12 -m venv venv
 source venv/bin/activate
 
 install requirements.txt
