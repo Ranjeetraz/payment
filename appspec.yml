@@ -3,8 +3,33 @@ os: linux
 files:
   - source: /
     destination: /home/ubuntu/django-aws_cicd
+
 hooks:
   BeforeInstall:
-      - location: scripts/before_install.sh
+    - location: scripts/before_install.sh
   AfterInstall:
-      - location: scripts/after_install.sh
+    - location: scripts/after_install.sh
+
+phases:
+  install:
+    commands:
+      - echo "Installing dependencies"
+      - sudo apt-get update -y
+      - sudo apt-get install -y docker
+
+  pre_build:
+    commands:
+      - echo "Logging into ECR"
+      - aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin 058264157176.dkr.ecr.ap-southeast-2.amazonaws.com
+
+  build:
+    commands:
+      - echo "Building Docker image"
+      - docker build -t simple-docker-service -f /home/ubuntu/django-aws_cicd/Dockerfile /home/ubuntu/django-aws_cicd
+
+  post_build:
+    commands:
+      - echo "Tagging Docker image"
+      - docker tag simple-docker-service:latest 058264157176.dkr.ecr.ap-southeast-2.amazonaws.com/simple-docker-service:latest
+      - echo "Pushing Docker image to ECR"
+      - docker push 058264157176.dkr.ecr.ap-southeast-2.amazonaws.com/simple-docker-service:latest
